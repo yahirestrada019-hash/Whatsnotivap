@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simulador de Notificación HyperOS - WhatsApp</title>
+  <title>Simulador Notificación HyperOS - WhatsApp</title>
   <style>
     :root {
       --bg-dark: #121212;
@@ -57,7 +57,7 @@
       margin-bottom: 4px;
     }
 
-    input[type="text"], input[type="file"], input[type="number"] {
+    input[type="text"], input[type="file"] {
       width: 100%;
       padding: 9px 12px;
       background: #2a2a2c;
@@ -73,12 +73,12 @@
       background: var(--wa-green);
       color: #000;
       border: none;
-      padding: 12px;
+      padding: 14px;
       border-radius: 12px;
-      font-size: 0.95rem;
+      font-size: 1rem;
       font-weight: bold;
       cursor: pointer;
-      margin-top: 8px;
+      margin-top: 10px;
     }
 
     .btn-perm {
@@ -86,9 +86,10 @@
       color: #fff;
       border: 1px solid #555;
       margin-bottom: 12px;
+      font-size: 0.9rem;
+      padding: 10px;
     }
 
-    /* --- ESTILO EXACTO NOTIFICACIÓN HYPEROS / MIUI --- */
     .preview-title {
       font-size: 0.85rem;
       color: var(--text-muted);
@@ -98,6 +99,7 @@
       max-width: 380px;
     }
 
+    /* --- TARJETA VISUAL EXACTA HYPEROS --- */
     .notif-card {
       background-color: var(--card-bg);
       width: 100%;
@@ -107,7 +109,6 @@
       box-sizing: border-box;
       box-shadow: 0 8px 24px rgba(0,0,0,0.6);
       border: 1px solid rgba(255,255,255,0.05);
-      position: relative;
     }
 
     .notif-header {
@@ -116,7 +117,6 @@
       gap: 12px;
     }
 
-    /* Avatar con insignia circular de WhatsApp */
     .avatar-container {
       position: relative;
       width: 46px;
@@ -193,7 +193,6 @@
       margin-left: 2px;
     }
 
-    /* Mensajes apilados */
     .message-list {
       display: flex;
       flex-direction: column;
@@ -207,7 +206,6 @@
       word-break: break-word;
     }
 
-    /* Botón flecha expandir/colapsar */
     .expand-btn {
       width: 28px;
       height: 28px;
@@ -231,7 +229,6 @@
       transition: transform 0.2s ease;
     }
 
-    /* Acciones inferiores (Responder, Marcar como leído, Silenciar) */
     .notif-actions {
       display: flex;
       justify-content: space-between;
@@ -256,11 +253,10 @@
 </head>
 <body>
 
-  <!-- PANEL DE CONFIGURACIÓN -->
   <div class="panel">
-    <h2>Configurar Notificación</h2>
+    <h2>Disparador de Notificación</h2>
     
-    <button class="action-btn btn-action btn-perm" onclick="requestPermission()">1. Activar Permisos de Notificación</button>
+    <button class="action-btn btn-perm" onclick="requestPermission()">1. Conceder Permisos de Notificación</button>
 
     <div class="form-group">
       <label>Foto de Perfil del Contacto</label>
@@ -282,21 +278,14 @@
       <input type="text" id="inputMsg2" value="Me estaba bañando">
     </div>
 
-    <div class="form-group">
-      <label>Segundos de espera para lanzar</label>
-      <input type="number" id="inputDelay" value="5">
-    </div>
-
-    <button class="btn-action" onclick="launchSimulation()">2. Lanzar y Minimizar App</button>
+    <button class="btn-action" onclick="sendInstantNotification()">2. ENVIAR NOTIFICACIÓN AHORA</button>
   </div>
 
   <div class="preview-title">Vista previa exacta estilo HyperOS:</div>
 
-  <!-- TARJETA VISUAL EXACTA HYPEROS -->
   <div class="notif-card" id="notifCard">
     <div class="notif-header">
       
-      <!-- Avatar con insignia circular verde de WhatsApp -->
       <div class="avatar-container">
         <img id="displayImg" class="profile-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='46' viewBox='0 0 24 24' fill='%23555'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E" alt="Foto">
         <div class="wa-badge">
@@ -306,7 +295,6 @@
         </div>
       </div>
 
-      <!-- Cuerpo de la notificación -->
       <div class="notif-body">
         <div class="notif-meta">
           <span id="displayName" class="contact-name">Carlos</span>
@@ -325,14 +313,12 @@
         </div>
       </div>
 
-      <!-- Botón flecha -->
       <button class="expand-btn" onclick="toggleExpand()">
         <svg id="arrowIcon" viewBox="0 0 24 24" style="transform: rotate(180deg);"><path d="M6 9l6 6 6-6"/></svg>
       </button>
 
     </div>
 
-    <!-- Acciones inferiores -->
     <div id="actionsRow" class="notif-actions">
       <button class="action-btn">Responder</button>
       <button class="action-btn">Marcar como l...</button>
@@ -355,7 +341,6 @@
     const arrowIcon = document.getElementById('arrowIcon');
     const actionsRow = document.getElementById('actionsRow');
 
-    // Manejar carga de imagen de perfil local
     inputImg.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -368,7 +353,6 @@
       }
     });
 
-    // Actualizar textos en tiempo real
     function updatePreview() {
       const name = inputName.value.trim() || "Carlos";
       const m1 = inputMsg1.value.trim();
@@ -378,6 +362,92 @@
       displayMessages.innerHTML = '';
 
       if (!isExpanded) {
+        const last = m2 || m1;
+        displayMessages.innerHTML = `<div class="message-item">${last}</div>`;
+      } else {
+        if (m1) {
+          const div1 = document.createElement('div');
+          div1.className = 'message-item';
+          div1.textContent = m1;
+          displayMessages.appendChild(div1);
+        }
+        if (m2) {
+          const div2 = document.createElement('div');
+          div2.className = 'message-item';
+          div2.textContent = m2;
+          displayMessages.appendChild(div2);
+        }
+      }
+    }
+
+    inputName.addEventListener('input', updatePreview);
+    inputMsg1.addEventListener('input", updatePreview);
+    inputMsg2.addEventListener('input', updatePreview);
+
+    function toggleExpand() {
+      isExpanded = !isExpanded;
+      if (isExpanded) {
+        arrowIcon.style.transform = 'rotate(180deg)';
+        actionsRow.classList.remove('hidden');
+      } else {
+        arrowIcon.style.transform = 'rotate(0deg)';
+        actionsRow.classList.add('hidden');
+      }
+      updatePreview();
+    }
+
+    function requestPermission() {
+      if (!("Notification" in window)) {
+        alert("Tu navegador no soporta notificaciones.");
+        return;
+      }
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          alert("¡Permisos de notificación concedidos!");
+        } else {
+          alert("Debes permitir las notificaciones en la configuración de Chrome.");
+        }
+      });
+    }
+
+    function sendInstantNotification() {
+      if (Notification.permission !== "granted") {
+        alert("Primero haz clic en '1. Conceder Permisos de Notificación'");
+        return;
+      }
+
+      const name = inputName.value.trim() || "Carlos";
+      const m1 = inputMsg1.value.trim();
+      const m2 = inputMsg2.value.trim();
+      const fullBody = (m1 && m2) ? `${m1}\n${m2}` : (m1 || m2);
+      const iconToUse = currentImageBase64 || 'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg';
+
+      // Vibración de alerta inmediata del celular
+      if ("vibrate" in navigator) {
+        navigator.vibrate([200, 100, 200]);
+      }
+
+      // Disparo inmediato sin demoras que bloquee el sistema
+      try {
+        const n = new Notification(name, {
+          body: fullBody,
+          icon: iconToUse,
+          badge: iconToUse,
+          tag: 'whatsapp-fake'
+        });
+
+        // Opcional: minimiza o avisa
+        setTimeout(() => {
+          window.location.href = "about:blank"; // Salta a página en blanco para salir de la web al instante
+        }, 300);
+      } catch (err) {
+        alert("Error al lanzar la notificación: " + err.message);
+      }
+    }
+  </script>
+</body>
+</html>
+w (!isExpanded) {
         const last = m2 || m1;
         displayMessages.innerHTML = `<div class="message-item">${last}</div>`;
       } else {
