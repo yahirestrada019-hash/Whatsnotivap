@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador de Notificación HyperOS - WhatsApp</title>
+  <style>
+    :root {
+      --bg-dark: #121212;
+      --card-bg: #222325;
+      --text-main: #e2e2e4;
+      --text-muted: #9d9ea2;
+      --action-blue: #a8c7fa;
+      --wa-green: #25d366;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      margin: 0;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .panel {
+      background: #1a1a1c;
+      padding: 18px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 380px;
+      box-sizing: border-box;
+      margin-bottom: 24px;
+      border: 1px solid #333;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 1.1rem;
+      color: var(--wa-green);
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    input[type="text"], input[type="file"], input[type="number"] {
+      width: 100%;
+      padding: 9px 12px;
+      background: #2a2a2c;
+      border: 1px solid #3e3e42;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.9rem;
+      box-sizing: border-box;
+    }
+
+    .btn-action {
+      width: 100%;
+      background: var(--wa-green);
+      color: #000;
+      border: none;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .btn-perm {
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
+      margin-bottom: 12px;
+    }
+
+    /* --- ESTILO EXACTO NOTIFICACIÓN HYPEROS / MIUI --- */
+    .preview-title {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-align: left;
+      width: 100%;
+      max-width: 380px;
+    }
+
+    .notif-card {
+      background-color: var(--card-bg);
+      width: 100%;
+      max-width: 380px;
+      border-radius: 28px;
+      padding: 14px 16px;
+      box-sizing: border-box;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.05);
+      position: relative;
+    }
+
+    .notif-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    /* Avatar con insignia circular de WhatsApp */
+    .avatar-container {
+      position: relative;
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+    }
+
+    .profile-img {
+      width: 46px;
+      height: 46px;
+      border-radius: 10px;
+      object-fit: cover;
+      background-color: #3e3e42;
+    }
+
+    .wa-badge {
+      position: absolute;
+      bottom: -3px;
+      right: -4px;
+      width: 18px;
+      height: 18px;
+      background-color: #1f2c25;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .wa-badge svg {
+      width: 11px;
+      height: 11px;
+      fill: var(--wa-green);
+    }
+
+    .notif-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .notif-meta {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 3px;
+      flex-wrap: wrap;
+    }
+
+    .contact-name {
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: #ffffff;
+    }
+
+    .meta-separator {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+
+    .app-name {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .time-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .bell-icon {
+      width: 12px;
+      height: 12px;
+      fill: var(--text-muted);
+      margin-left: 2px;
+    }
+
+    /* Mensajes apilados */
+    .message-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .message-item {
+      font-size: 0.95rem;
+      color: #d1d1d6;
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    /* Botón flecha expandir/colapsar */
+    .expand-btn {
+      width: 28px;
+      height: 28px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .expand-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: #d1d1d5;
+      stroke-width: 2.2;
+      fill: none;
+      transition: transform 0.2s ease;
+    }
+
+    /* Acciones inferiores (Responder, Marcar como leído, Silenciar) */
+    .notif-actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 14px;
+      padding-top: 4px;
+    }
+
+    .action-btn {
+      color: var(--action-blue);
+      font-size: 0.88rem;
+      font-weight: 500;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PANEL DE CONFIGURACIÓN -->
+  <div class="panel">
+    <h2>Configurar Notificación</h2>
+    
+    <button class="action-btn btn-action btn-perm" onclick="requestPermission()">1. Activar Permisos de Notificación</button>
+
+    <div class="form-group">
+      <label>Foto de Perfil del Contacto</label>
+      <input type="file" id="inputImg" accept="image/*">
+    </div>
+
+    <div class="form-group">
+      <label>Nombre del Contacto</label>
+      <input type="text" id="inputName" value="Carlos">
+    </div>
+
+    <div class="form-group">
+      <label>Mensaje 1</label>
+      <input type="text" id="inputMsg1" value="Voy jajaja">
+    </div>
+
+    <div class="form-group">
+      <label>Mensaje 2</label>
+      <input type="text" id="inputMsg2" value="Me estaba bañando">
+    </div>
+
+    <div class="form-group">
+      <label>Segundos de espera para lanzar</label>
+      <input type="number" id="inputDelay" value="5">
+    </div>
+
+    <button class="btn-action" onclick="launchSimulation()">2. Lanzar y Minimizar App</button>
+  </div>
+
+  <div class="preview-title">Vista previa exacta estilo HyperOS:</div>
+
+  <!-- TARJETA VISUAL EXACTA HYPEROS -->
+  <div class="notif-card" id="notifCard">
+    <div class="notif-header">
+      
+      <!-- Avatar con insignia circular verde de WhatsApp -->
+      <div class="avatar-container">
+        <img id="displayImg" class="profile-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='46' viewBox='0 0 24 24' fill='%23555'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E" alt="Foto">
+        <div class="wa-badge">
+          <svg viewBox="0 0 24 24">
+            <path d="M12.011 2c-5.506 0-9.989 4.478-9.989 9.984 0 1.762.459 3.479 1.332 5.001l-1.416 5.17 5.292-1.387c1.472.802 3.136 1.226 4.781 1.226 5.505 0 9.988-4.478 9.988-9.984 0-5.506-4.483-9.984-9.988-9.984z"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Cuerpo de la notificación -->
+      <div class="notif-body">
+        <div class="notif-meta">
+          <span id="displayName" class="contact-name">Carlos</span>
+          <span class="meta-separator">•</span>
+          <span class="app-name">WhatsApp</span>
+          <span class="meta-separator">•</span>
+          <span class="time-text">ahora</span>
+          <svg class="bell-icon" viewBox="0 0 24 24">
+            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+          </svg>
+        </div>
+
+        <div id="displayMessages" class="message-list">
+          <div class="message-item">Voy jajaja</div>
+          <div class="message-item">Me estaba bañando</div>
+        </div>
+      </div>
+
+      <!-- Botón flecha -->
+      <button class="expand-btn" onclick="toggleExpand()">
+        <svg id="arrowIcon" viewBox="0 0 24 24" style="transform: rotate(180deg);"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+
+    </div>
+
+    <!-- Acciones inferiores -->
+    <div id="actionsRow" class="notif-actions">
+      <button class="action-btn">Responder</button>
+      <button class="action-btn">Marcar como l...</button>
+      <button class="action-btn">Silenciar</button>
+    </div>
+  </div>
+
+  <script>
+    let isExpanded = true;
+    let currentImageBase64 = null;
+
+    const inputImg = document.getElementById('inputImg');
+    const inputName = document.getElementById('inputName');
+    const inputMsg1 = document.getElementById('inputMsg1');
+    const inputMsg2 = document.getElementById('inputMsg2');
+    
+    const displayImg = document.getElementById('displayImg');
+    const displayName = document.getElementById('displayName');
+    const displayMessages = document.getElementById('displayMessages');
+    const arrowIcon = document.getElementById('arrowIcon');
+    const actionsRow = document.getElementById('actionsRow');
+
+    // Manejar carga de imagen de perfil local
+    inputImg.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          currentImageBase64 = event.target.result;
+          displayImg.src = currentImageBase64;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Actualizar textos en tiempo real
+    function updatePreview() {
+      const name = inputName.value.trim() || "Carlos";
+      const m1 = inputMsg1.value.trim();
+      const m2 = inputMsg2.value.trim();
+
+      displayName.textContent = name;
+      displayMessages.innerHTML = '';
+
+      if (!isExpanded) {
+        const last = m2 || m1;
+        displayMessages.innerHTML = `<div class="message-item">${last}</div>`;
+      } else {
+        if (m1) {
+          const div1 = document.createElement('div');
+          div1.className = 'message-item';
+          div1.textContent = m1;
+          displayMessages.appendChild(div1);
+        }
+        if (m2) {
+          const div2 = document.createElement('div');
+          div2.className = 'message-item';
+          div2.textContent = m2;
+          displayMessages.appendChild(div2);
+        }
+      }
+    }
+
+    inputName.addEventListener('input', updatePreview);
+    inputMsg1.addEventListener('input', updatePreview);
+    inputMsg2.addEventListener('input', updatePreview);
+
+    // Alternar colapsado/expandido en la tarjeta visual
+    function toggleExpand() {
+      isExpanded = !isExpanded;
+      if (isExpanded) {
+        arrowIcon.style.transform = 'rotate(180deg)';
+        actionsRow.classList.remove('hidden');
+      } else {
+        arrowIcon.style.transform = 'rotate(0deg)';
+        actionsRow.classList.add('hidden');
+      }
+      updatePreview();
+    }
+
+    // Solicitar permisos de notificación de forma segura
+    function requestPermission() {
+      if (!("Notification" in window)) {
+        alert("Tu navegador no soporta notificaciones.");
+        return;
+      }
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          alert("¡Permisos de notificación concedidos con éxito!");
+        } else {
+          alert("Por favor habilita las notificaciones en la configuración de tu navegador.");
+        }
+      });
+    }
+
+    // Lanzar la notificación real del sistema en el tiempo indicado
+    function launchSimulation() {
+      if (Notification.permission !== "granted") {
+        alert("Primero haz clic en '1. Activar Permisos de Notificación'");
+        return;
+      }
+
+      const name = inputName.value.trim() || "Carlos";
+      const m1 = inputMsg1.value.trim();
+      const m2 = inputMsg2.value.trim();
+      const fullBody = (m1 && m2) ? `${m1}\n${m2}` : (m1 || m2);
+      const delay = parseInt(inputDelay.value) || 5;
+
+      alert(`Notificación programada. ¡Minimiza el navegador ahora mismo y espera ${delay} segundos!`);
+
+      setTimeout(() => {
+        const iconToUse = currentImageBase64 || 'https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg';
+        
+        const options = {
+          body: fullBody,
+          icon: iconToUse,
+          badge: iconToUse,
+          vibrate: [300, 100, 300],
+          tag: 'whatsapp-fake'
+        };
+
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.ready.then(reg => {
+            reg.showNotification(name, options);
+          });
+        } else {
+          new Notification(name, options);
+        }
+      }, delay * 1000);
+    }
+  </script>
+</body>
+  </html>
+  q
